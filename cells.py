@@ -99,8 +99,7 @@ class CellMap(pygame.sprite.Sprite):
         self.columns = size[0] // square_size
         self.rows = size[1] // square_size
         self.cells: list[Cell] = []
-        for _ in range(self.columns*self.rows):
-            self.cells.append(Cell())
+        self.cells.extend(Cell() for _ in range(self.columns*self.rows))
 
     def get_cell(self, x: int, y: int) -> Cell:
         """Get the value of a cell."""
@@ -128,18 +127,18 @@ class CellMap(pygame.sprite.Sprite):
         """Link two unique cell sides together for portal mechanics."""
         if first_location == second_location:
             cell = self.get_cell(*first_location)
-            new_type = (Portal() if not isinstance(cell.type_, Portal)
-                        else cell.type_)
+            new_type = (cell.type_ if isinstance(cell.type_, Portal)
+                        else Portal())
             new_type.links[first_side] = (first_location, second_side)
             new_type.links[second_side] = (first_location, first_side)
             self.set_cell_type(*first_location, new_type)
         else:
             first_cell = self.get_cell(*first_location)
             second_cell = self.get_cell(*second_location)
-            new_first_type = (Portal() if not isinstance(first_cell.type_, Portal)
-                              else first_cell.type_)
-            new_second_type = (Portal() if not isinstance(second_cell.type_, Portal)
-                               else second_cell.type_)
+            new_first_type = (first_cell.type_ if isinstance(first_cell.type_, Portal)
+                              else Portal())
+            new_second_type = (second_cell.type_ if isinstance(second_cell.type_, Portal)
+                               else Portal())
             new_first_type.links[first_side] = (second_location, second_side)
             new_second_type.links[second_side] = (first_location, first_side)
             self.set_cell_type(*first_location, new_first_type)
@@ -154,7 +153,7 @@ class CellMap(pygame.sprite.Sprite):
                 return
             cell.type_.links[first_side] = None
             cell.type_.links[second_side] = None
-            if not any(link is not None for link in cell.type_.links.values()):
+            if all(link is None for link in cell.type_.links.values()):
                 cell.type_ = False
             cell.draw(first_location, self)
         else:
@@ -165,9 +164,9 @@ class CellMap(pygame.sprite.Sprite):
                 return
             first_cell.type_.links[first_side] = None
             second_cell.type_.links[second_side] = None
-            if not any(link is not None for link in first_cell.type_.links.values()):
+            if all(link is None for link in first_cell.type_.links.values()):
                 first_cell.type_ = False
-            if not any(link is not None for link in second_cell.type_.links.values()):
+            if all(link is None for link in second_cell.type_.links.values()):
                 second_cell.type_ = False
             first_cell.draw(first_location, self)
             second_cell.draw(second_location, self)

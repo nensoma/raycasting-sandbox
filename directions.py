@@ -22,7 +22,7 @@ class Direction(Flag):
             return reduce(lambda a, b: a | b, rotated_components)
         assert self.value in {1, 2, 4, 8}
         value = int(math.log2(self.value))
-        delta = times if not ccw else -times
+        delta = -times if ccw else times
         return Direction(1 << ((value + delta) % 4))
 
     def difference(self, other: Direction) -> int:

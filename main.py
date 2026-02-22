@@ -32,9 +32,9 @@ DIVIDE_COLUMNS = False  # show vertical dividers for screen columns
 VISIBLE_DISTANCE = int(min(2**1/2*MAP_SIZE, VISIBLE_DISTANCE))
 
 # reduce screen dimensions to conform to configuration
-SCREEN_WIDTH = SCREEN_WIDTH - (SCREEN_WIDTH % COLUMN_WIDTH)
+SCREEN_WIDTH -= SCREEN_WIDTH % COLUMN_WIDTH
 SQUARE_SIZE = min(SCREEN_WIDTH, SCREEN_HEIGHT) // MAP_SIZE
-SCREEN_HEIGHT = SCREEN_HEIGHT - (SCREEN_HEIGHT % SQUARE_SIZE)
+SCREEN_HEIGHT -= SCREEN_HEIGHT % SQUARE_SIZE
 
 # width and height of map in pixels (square map)
 MAP_LENGTH = min(SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -163,8 +163,7 @@ class Sandbox:
                     first_position, first_side = self.first_portal
                     second_position, second_side = mouse_cell, closest_side
 
-                    if not ((first_position == second_position)
-                            and (first_side == second_side)):
+                    if first_position != second_position or first_side != second_side:
                         self.cell_map.link_sides(first_position, first_side,
                                             second_position, second_side)
                         self.edited_cells.extend([first_position, second_position])
@@ -220,17 +219,16 @@ class Sandbox:
         """Draw individual calculated points for rays, with connecting lines."""
         ray_points_len = len(ray_points)
         last_point = None
-        for j, point in enumerate(ray_points):
+        for i, point in enumerate(ray_points):
             color = self.interpolate_colors(
                 (255, 0, 0), (0, 255, 0), index/self.raycaster.ray_count)
-            width = 1 if j in range(ray_points_len-3, ray_points_len) else 0
+            width = 1 if i in range(ray_points_len-3, ray_points_len) else 0
             pygame.draw.circle(self.map_canvas, color, point, 5, width=width)
             cell_pos = split_position(pygame.Vector2(point),
                                         self.cell_map.square_size)[1]
-            if self.distance_to_closest_side((cell_pos.x, cell_pos.y)) > 0.05:
-                if j not in {0, ray_points_len-1}:
-                    pygame.draw.circle(self.map_canvas, (255, 255, 0),
-                                        point, 10, width=2)
+            if (i not in {0, ray_points_len-1}
+                    and self.distance_to_closest_side((cell_pos.x, cell_pos.y)) > 0.05):
+                pygame.draw.circle(self.map_canvas, (255, 255, 0), point, 10, width=2)
             if last_point is not None:
                 # lines for debugging purposes (points should travel in straight lines)
                 delta = (pygame.Vector2(point) - pygame.Vector2(last_point)).magnitude()
