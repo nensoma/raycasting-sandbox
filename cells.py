@@ -210,7 +210,7 @@ class CellMap(pygame.sprite.Sprite):
 
     @staticmethod
     def get_cell_rect(x: int, y: int, square_size: int) -> tuple[int, int, int, int]:
-        """Find the corresponsding rect of a cell on the map's surface."""
+        """Find the corresponding rect of a cell on the map's surface."""
         return (x*square_size, y*square_size, square_size, square_size)
 
     @staticmethod
